@@ -123,7 +123,9 @@ func (c *conntrackWalker) run() {
 	}
 	c.Lock()
 	for _, flow := range existingFlows {
+		f := flow
 		if c.relevant(flow) && flow.TCPState != tcpClose && flow.TCPState != timeWait {
+			fmt.Printf("existing id: %x, type: %d, state: %s, status: %s, orig: %v, reply: %v\n", f.CtId, f.MsgType, f.TCPState, f.Status.String(), f.Orig, f.Reply)
 			c.activeFlows[flow.CtId] = flow
 		}
 	}

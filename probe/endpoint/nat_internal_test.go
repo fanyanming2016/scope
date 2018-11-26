@@ -47,10 +47,11 @@ func TestNat(t *testing.T) {
 	{
 		f := conntrack.Conn{
 			MsgType: conntrack.NfctMsgUpdate,
+			Status:  conntrack.IPS_DST_NAT,
 			Orig: conntrack.Tuple{
 				Src:     host2,
 				Dst:     host1,
-				SrcPort: 22222,
+				SrcPort: 22223,
 				DstPort: 80,
 				Proto:   syscall.IPPROTO_TCP,
 			},
@@ -58,7 +59,7 @@ func TestNat(t *testing.T) {
 				Src:     c1,
 				Dst:     host2,
 				SrcPort: 80,
-				DstPort: 22222,
+				DstPort: 22223,
 				Proto:   syscall.IPPROTO_TCP,
 			},
 			CtId: 1,
@@ -73,9 +74,12 @@ func TestNat(t *testing.T) {
 		have.Endpoint.AddNode(report.MakeNodeWith(originalID, map[string]string{
 			"foo": "bar",
 		}))
+		fromID := report.MakeEndpointNodeID("host2", "", "2.3.4.5", "22223")
+		have.Endpoint.AddNode(report.MakeNodeWith(fromID, nil).WithAdjacent(originalID))
 
 		want := have.Copy()
 		wantID := report.MakeEndpointNodeID("host1", "", "1.2.3.4", "80")
+		want.Endpoint.AddNode(report.MakeNodeWith(fromID, nil).WithAdjacent(wantID))
 		want.Endpoint.AddNode(report.MakeNodeWith(wantID, map[string]string{
 			CopyOf: originalID,
 			"foo":  "bar",
@@ -91,6 +95,7 @@ func TestNat(t *testing.T) {
 	{
 		f := conntrack.Conn{
 			MsgType: conntrack.NfctMsgUpdate,
+			Status:  conntrack.IPS_SRC_NAT,
 			Orig: conntrack.Tuple{
 				Src:     c2,
 				Dst:     host1,

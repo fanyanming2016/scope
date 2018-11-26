@@ -134,9 +134,9 @@ func (r *Reporter) Report() (report.Report, error) {
 			Uptime:                strconv.Itoa(int(uptime / time.Second)), // uptime in seconds
 			ScopeVersion:          r.version,
 		}).
-			WithSets(report.MakeSets().
+			/*WithSets(report.MakeSets().
 				Add(LocalNetworks, report.MakeStringSet(localCIDRs...)),
-			).
+			).*/
 			WithMetrics(metrics).
 			WithLatestActiveControls(ExecHost),
 	)

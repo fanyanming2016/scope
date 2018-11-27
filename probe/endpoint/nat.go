@@ -78,6 +78,15 @@ Outgoing from a pod:
   We want: 10.32.0.7:36078->18.221.99.178:443
    - leave it alone.
 
+Docker container exposing port to similar on different host
+host1:
+  picked up by ebpf as ip-172-31-5-80;172.17.0.2:43042->172.31.2.17:8080
+  NAT: IPS_SRC_NAT orig: 172.17.0.2:43042->172.31.2.17:8080, reply: 172.31.2.17:8080-> 172.31.5.80:43042
+host2:
+  picked up by ebpf as 172.31.5.80:43042->172.17.0.2:80
+  NAT: IPS_DST_NAT orig: 172.31.5.80:43042->172.31.2.17:8080, reply: 172.17.0.2:80->172.31.5.80:43042
+  Ideally we might want: 172.17.0.2:43042->172.17.0.2:80
+
 All of the above can be satisfied by these rules:
   For SRC_NAT replace the source with the NAT original source
   For DST_NAT replace the destination with the NAT reply source
@@ -123,8 +132,14 @@ func (n natMapper) applyNAT(rpt report.Report, scope string) {
 				toID := endpointNodeID(scope, f.Reply.Src, f.Reply.SrcPort)
 				fromNode.Adjacency = fromNode.Adjacency.Minus(toID)
 				if len(fromNode.Adjacency) == 0 {
+					if count < 5 {
+						fmt.Printf("delete node %s\n", fromID)
+					}
 					delete(rpt.Endpoint.Nodes, fromID)
 				} else {
+					if count < 5 {
+						fmt.Printf("removed adjacency %s from node %s\n", toID, fromID)
+					}
 					rpt.Endpoint.Nodes[fromID] = fromNode
 				}
 

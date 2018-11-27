@@ -64,21 +64,21 @@ Pod to pod via Kubernetes service
   picked up by ebpf as 10.32.0.16:47600->10.105.173.176:5432 and 10.32.0.6:5432 (??)
   NAT IPS_DST_NAT orig: 10.32.0.16:47600->10.105.173.176:5432, reply: 10.32.0.6:5432->10.32.0.16:47600
   We want: 10.32.0.16:47600->10.32.0.6:5432
-  IOW replace the destination with the NAT reply source
+   - replace the destination with the NAT reply source
 
 Incoming from outside the cluster to a NodePort:
   picked up by ebpf as 10.32.0.1:13488->10.32.0.7:80
   NAT: IPS_SRC_NAT IPS_DST_NAT orig: 37.157.33.76:13488->172.31.2.17:30081, reply: 10.32.0.7:80->10.32.0.1:13488
   We want: 37.157.33.76:13488->10.32.0.7:80
-  IOW replace the source with the NAT original source
+   - replace the source with the NAT original source
 
 Outgoing from a pod:
   picked up by ebpf as 10.32.0.7:36078->18.221.99.178:443
   NAT:  IPS_SRC_NAT orig: 10.32.0.7:36078->18.221.99.178:443, reply: 18.221.99.178:443->172.31.2.17:36078
   We want: 10.32.0.7:36078->18.221.99.178:443
-  IOW leave it alone.
+   - leave it alone.
 
-Postulate: the rules are:
+All of the above can be satisfied by these rules:
   For SRC_NAT replace the source with the NAT original source
   For DST_NAT replace the destination with the NAT reply source
 */
